@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+        }
+
+        #floater {
+            width: 60px;
+            height: 60px;
+            background: #fafafa;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.2s;
+            -webkit-app-region: drag;
+        }
+
+        #floater:hover {
+            border-color: #3B82F6;
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        #logo {
+            width: 40px;
+            height: 40px;
+            pointer-events: none;
+        }
+
+        /* Expanded Controls */
+        #controls {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            padding: 10px;
+            width: 260px;
+        }
+
+        .controls-visible #floater {
+            display: none;
+        }
+
+        .controls-visible #controls {
+            display: flex;
+        }
+
+        .row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .btn {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            -webkit-app-region: no-drag;
+            transition: all 0.1s;
+        }
+
+        .btn:hover {
+            background: #e2e8f0;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-primary {
+            background: #F97316;
+            color: white;
+            border-color: #ea580c;
+        }
+
+        .btn-primary:hover {
+            background: #ea580c;
+        }
+
+        .btn-blue {
+            background: #3B82F6;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        .btn-blue:hover {
+            background: #2563eb;
+        }
+
+        .btn-icon {
+            width: 36px;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .flex-1 {
+            flex: 1;
+        }
+
+        select {
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            font-size: 12px;
+            -webkit-app-region: no-drag;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .title {
+            font-weight: 600;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .title img {
+            width: 24px;
+            height: 24px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #94a3b8;
+            -webkit-app-region: no-drag;
+        }
+
+        .close-btn:hover {
+            color: #ef4444;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <!-- Collapsed State -->
+        <div id="floater" onclick="expand()">
+            <img id="logo" src="assets/logo.png" draggable="false">
+        </div>
+
+        <!-- Expanded State -->
+        <div id="controls">
+            <div class="header">
+                <div class="title">
+                    <img src="assets/logo.png"> iiwii
+                </div>
+                <button class="close-btn" onclick="collapse()">×</button>
+            </div>
+
+            <!-- Playback -->
+            <div class="row">
+                <button id="btnBack" class="btn btn-icon" title="Back 10s">◀◀</button>
+                <button id="btnPlay" class="btn btn-primary flex-1" title="Play/Pause">▶ Play</button>
+                <button id="btnFwd" class="btn btn-icon" title="Forward 10s">▶▶</button>
+            </div>
+
+            <!-- Voice & Speed -->
+            <div class="row">
+                <select id="voiceSelect" title="Voice">
+                    <option value="">Default Voice</option>
+                    <option value="Microsoft David Desktop">David</option>
+                    <option value="Microsoft Zira Desktop">Zira</option>
+                </select>
+                <select id="speedSelect" title="Speed">
+                    <option value="1">1×</option>
+                    <option value="1.25">1.25×</option>
+                    <option value="1.5">1.5×</option>
+                    <option value="2">2×</option>
+                </select>
+            </div>
+
+            <!-- Actions -->
+            <div class="row">
+                <button id="btnSum" class="btn btn-blue flex-1">✨ Summarize</button>
+                <button id="btnHistory" class="btn flex-1">📜 History</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const container = document.getElementById('container');
+
+        function expand() {
+            container.classList.add('controls-visible');
+            window.api.floaterExpand();
+        }
+
+        function collapse() {
+            container.classList.remove('controls-visible');
+            window.api.floaterCollapse();
+        }
+
+        // Listen for external commands
+        window.api.onShowControls(() => container.classList.add('controls-visible'));
+        window.api.onHideControls(() => container.classList.remove('controls-visible'));
+
+        // Playback
+        let currentText = "";
+        let isPlaying = false;
+
+        window.api.onNewText((text) => {
+            currentText = text;
+        });
+
+        document.getElementById('btnPlay').onclick = () => {
+            if (currentText) {
+                const speed = parseFloat(document.getElementById('speedSelect').value);
+                window.api.speak(currentText, speed);
+                document.getElementById('btnPlay').textContent = "🛑 Stop";
+                isPlaying = true;
+            }
+        };
+
+        document.getElementById('btnSum').onclick = async () => {
+            if (!currentText) return;
+            document.getElementById('btnSum').textContent = "⏳...";
+            const summary = await window.api.summarize(currentText);
+            document.getElementById('btnSum').textContent = "✨ Summarize";
+            if (summary) {
+                const speed = parseFloat(document.getElementById('speedSelect').value);
+                window.api.speak(summary, speed);
+            }
+        };
+
+        document.getElementById('btnHistory').onclick = () => {
+            // TODO: Show history
+            alert("History coming soon!");
+        };
+    </script>
+</body>
+
+</html>

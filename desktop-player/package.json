@@ -1,0 +1,16 @@
+{
+    "name": "gemini-reader-desktop",
+    "version": "1.0.0",
+    "description": "Standalone floating audio player with play/pause, speed, forward/backward controls.",
+    "main": "main.js",
+    "scripts": {
+        "start": "electron .",
+        "build": "electron-packager . GeminiReaderDesktop --platform=win32 --arch=x64 --out=dist --overwrite"
+    },
+    "author": "dell3630",
+    "license": "MIT",
+    "dependencies": {
+        "electron": "^30.0.0",
+        "say": "^0.16.0"
+    }
+}
