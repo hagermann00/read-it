@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Gemini Reader",
+  "version": "1.0",
+  "description": "Listen to any text on the web using Google Gemini.",
+  "permissions": [
+    "sidePanel",
+    "contextMenus",
+    "storage"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Open Gemini Reader"
+  },
+  "side_panel": {
+    "default_path": "index.html"
+  },
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  }
+}

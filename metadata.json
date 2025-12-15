@@ -1,0 +1,5 @@
+{
+  "name": "Gemini Reader Extension",
+  "description": "An economical text-to-speech reader using Gemini Flash for summarization and Gemini TTS for high-quality audio playback.",
+  "requestFramePermissions": []
+}
