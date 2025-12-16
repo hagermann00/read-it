@@ -1,23 +1,33 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Force
 
-; Only trigger on LEFT MOUSE UP while SHIFT is NOT held (to avoid messing with normal Shift+Click selection)
+; Store last trigger time to prevent spam
+lastTrigger := 0
+
 ~LButton Up:: {
-    ; Small delay to let selection complete
-    Sleep(150)
+    global lastTrigger
     
-    ; Save current clipboard
-    ClipSaved := A_Clipboard
+    ; Debounce - only trigger every 500ms
+    if (A_TickCount - lastTrigger < 500)
+        return
+    
+    Sleep(200)
+    
+    ; Save clipboard BEFORE touching it
+    ClipSaved := ClipboardAll()
+    
+    ; Clear and try copy
     A_Clipboard := ""
-    
-    ; Try to copy
     SendInput("^c")
     
-    ; Wait briefly
+    ; Wait for clipboard
     if (ClipWait(0.3)) {
-        ; Only if we got NEW text that's different from what was there
         newText := A_Clipboard
-        if (newText != "" && newText != ClipSaved) {
+        
+        ; Only trigger if we got actual new text
+        if (newText != "") {
+            lastTrigger := A_TickCount
+            
             CoordMode "Mouse", "Screen"
             MouseGetPos &x, &y
             
@@ -27,11 +37,10 @@
                     FileDelete TriggerFile
                 FileAppend x "," y, TriggerFile
             }
-            ; Keep the new text in clipboard (user wanted to copy it anyway)
-            return
+            return  ; Keep new text in clipboard
         }
     }
     
-    ; Restore clipboard if we didn't get new text
+    ; RESTORE clipboard if we didn't get new text
     A_Clipboard := ClipSaved
 }

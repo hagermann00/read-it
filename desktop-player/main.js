@@ -25,10 +25,10 @@ function createFloater() {
     const { width, height } = display.workAreaSize;
 
     floaterWindow = new BrowserWindow({
-        width: 55,
-        height: 55,
-        x: width - 70,
-        y: height - 70,
+        width: 80,
+        height: 80,
+        x: width - 100,
+        y: height - 100,
         frame: false,
         transparent: true,
         alwaysOnTop: true,
@@ -57,7 +57,7 @@ function createFloater() {
 
     ipcMain.on('floater-collapse', () => {
         if (floaterWindow) {
-            floaterWindow.setSize(70, 70);
+            floaterWindow.setSize(80, 80);
             floaterWindow.webContents.send('hide-controls');
         }
     });
@@ -85,9 +85,9 @@ function createPopup() {
 }
 
 // Audio handlers
-ipcMain.on('speak', (e, { text, speed }) => {
+ipcMain.on('speak', (e, { text, speed, voice }) => {
     say.stop();
-    say.speak(text, null, speed || 1.0);
+    say.speak(text, voice || null, speed || 1.0);
 });
 
 ipcMain.on('stop', () => say.stop());

@@ -9,30 +9,68 @@
             overflow: hidden;
         }
 
+        /* TOP Grip - BLUE for docking */
+        #grip-top {
+            width: 80px;
+            height: 8px;
+            background: #0056B3;
+            border-radius: 8px 8px 0 0;
+            cursor: grab;
+            -webkit-app-region: drag;
+        }
+
+        #grip-top:active {
+            cursor: grabbing;
+        }
+
         #floater {
-            width: 60px;
-            height: 60px;
-            background: #fafafa;
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
+            width: 80px;
+            height: 64px;
+            background: #A8A8A8;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            transition: all 0.2s;
             -webkit-app-region: drag;
         }
 
         #floater:hover {
-            border-color: #3B82F6;
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+            background: #B8B8B8;
         }
 
         #logo {
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             pointer-events: none;
+        }
+
+        /* BOTTOM Grip - ORANGE for docking */
+        #grip-bottom {
+            width: 80px;
+            height: 8px;
+            background: #FF6B35;
+            border-radius: 0 0 8px 8px;
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-app-region: drag;
+        }
+
+        #grip-bottom:active {
+            cursor: grabbing;
+        }
+
+        #grip-bottom .dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        #grip-bottom .dot {
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
         }
 
         /* Expanded Controls */
@@ -154,9 +192,21 @@
 
 <body>
     <div id="container">
+        <!-- Top Grip (BLUE) -->
+        <div id="grip-top"></div>
+
         <!-- Collapsed State -->
         <div id="floater" onclick="expand()">
             <img id="logo" src="assets/logo.png" draggable="false">
+        </div>
+
+        <!-- Bottom Grip (ORANGE) -->
+        <div id="grip-bottom">
+            <div class="dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
         </div>
 
         <!-- Expanded State -->
@@ -226,7 +276,8 @@
         document.getElementById('btnPlay').onclick = () => {
             if (currentText) {
                 const speed = parseFloat(document.getElementById('speedSelect').value);
-                window.api.speak(currentText, speed);
+                const voice = document.getElementById('voiceSelect').value || null;
+                window.api.speak(currentText, speed, voice);
                 document.getElementById('btnPlay').textContent = "🛑 Stop";
                 isPlaying = true;
             }
@@ -239,7 +290,8 @@
             document.getElementById('btnSum').textContent = "✨ Summarize";
             if (summary) {
                 const speed = parseFloat(document.getElementById('speedSelect').value);
-                window.api.speak(summary, speed);
+                const voice = document.getElementById('voiceSelect').value || null;
+                window.api.speak(summary, speed, voice);
             }
         };
 
