@@ -9,6 +9,9 @@ let popupWindow;    // The bar that shows on text selection
 let GEMINI_API_KEY = "";
 
 const TRIGGER_FILE = "c:\\Y-OS\\Y-IT_ENGINES\\read-it\\desktop-player\\.trigger_event";
+const TOGGLE_FILE = "c:\\Y-OS\\Y-IT_ENGINES\\read-it\\desktop-player\\.toggle_floater";
+
+let isExpanded = false;
 
 // Load API Key
 try {
@@ -52,6 +55,7 @@ function createFloater() {
         if (floaterWindow) {
             floaterWindow.setSize(280, 200);
             floaterWindow.webContents.send('show-controls');
+            isExpanded = true;
         }
     });
 
@@ -59,6 +63,7 @@ function createFloater() {
         if (floaterWindow) {
             floaterWindow.setSize(80, 80);
             floaterWindow.webContents.send('hide-controls');
+            isExpanded = false;
         }
     });
 }
@@ -137,8 +142,35 @@ function watchTrigger() {
     });
 }
 
+// Watch for global hotkey toggle (Ctrl+Alt+I)
+function watchToggle() {
+    fs.watchFile(TOGGLE_FILE, { interval: 150 }, () => {
+        try {
+            if (fs.existsSync(TOGGLE_FILE)) {
+                // Toggle the floater state
+                if (floaterWindow) {
+                    if (isExpanded) {
+                        floaterWindow.setSize(80, 80);
+                        floaterWindow.webContents.send('hide-controls');
+                        isExpanded = false;
+                    } else {
+                        floaterWindow.setSize(280, 200);
+                        floaterWindow.webContents.send('show-controls');
+                        isExpanded = true;
+                    }
+                    // Bring floater to focus
+                    floaterWindow.show();
+                    floaterWindow.focus();
+                }
+            }
+        } catch (e) { }
+    });
+}
+
 app.whenReady().then(() => {
     createFloater();
     createPopup();
     watchTrigger();
+    watchToggle();
 });
+

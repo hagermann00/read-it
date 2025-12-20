@@ -3,6 +3,27 @@
 
 ; Store last trigger time to prevent spam
 lastTrigger := 0
+lastToggle := 0
+
+; ============================================
+; GLOBAL HOTKEY: Ctrl+Alt+I to toggle floater
+; ============================================
+^!i:: {
+    global lastToggle
+    
+    ; Debounce - only trigger every 300ms
+    if (A_TickCount - lastToggle < 300)
+        return
+    
+    lastToggle := A_TickCount
+    
+    try {
+        ToggleFile := "c:\Y-OS\Y-IT_ENGINES\read-it\desktop-player\.toggle_floater"
+        if FileExist(ToggleFile)
+            FileDelete ToggleFile
+        FileAppend A_TickCount, ToggleFile
+    }
+}
 
 ~LButton Up:: {
     global lastTrigger
