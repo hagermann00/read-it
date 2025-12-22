@@ -6,84 +6,126 @@ body {
   overflow: hidden;
   background: transparent;
   font-family: 'Segoe UI', sans-serif;
+  color: #333;
+  -webkit-user-select: none;
   user-select: none;
 }
 
 #pod {
-  background: rgba(15, 23, 42, 0.9);
-  /* Dark */
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 6px;
+  background: #ffffff;
+  /* Solid White */
+  border: 1px solid #e2e8f0;
+  /* Light gray border */
+  border-radius: 8px;
+  /* Slightly more rounded */
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  padding: 6px 4px;
+  /* More padding */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  /* Softer shadow */
   width: fit-content;
-  height: 28px;
+  height: 44px;
+  /* Taller for better hit targets */
 
-  /* CRITICAL: Drag on background, but allow buttons to pierce */
+  /* CRITICAL: Drag on background */
   -webkit-app-region: drag;
+  -webkit-user-select: none;
   user-select: none;
 }
 
 #pod.flash {
   border-color: #F97316;
+  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2);
 }
 
 .btn {
   background: transparent;
   border: none;
-  cursor: pointer;
-
-  /* CRITICAL: Allow clicks */
+  cursor: default;
   -webkit-app-region: no-drag;
-
   display: flex;
   align-items: center;
   justify-content: center;
   height: 100%;
-  padding: 0 10px;
-  font-size: 13px;
-  font-weight: 700;
-  color: #94a3b8;
-  transition: all 0.05s;
+  padding: 0 14px;
+  /* Wider buttons */
+  font-size: 16px;
+  /* Larger icons */
+  color: #64748b;
+  /* Slate-500 */
+  border-radius: 6px;
+  transition: all 0.1s;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Draggable regions */
+.draggable {
+  -webkit-app-region: drag;
+}
+
+.clickable {
+  -webkit-app-region: no-drag;
+  cursor: pointer;
 }
 
 /* Feedback */
 .btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
+  background: #f1f5f9;
+  /* Slate-100 */
+  color: #0f172a;
+  /* Slate-900 */
 }
 
 .btn:active {
-  transform: scale(0.9);
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
+  transform: scale(0.95);
+  background: #e2e8f0;
 }
 
 .sep {
   width: 1px;
-  height: 14px;
-  background: rgba(255, 255, 255, 0.15);
+  height: 20px;
+  background: #e2e8f0;
 }
 
-/* Play Orange */
-.btn-play {
+/* Specific Colors */
+#btnPlay {
   color: #F97316;
-  font-size: 15px;
+  /* Orange-500 */
 }
 
-/* AI Blue */
-.btn-ai {
+#btnPlay:hover {
+  background: #fff7ed;
+  /* Orange-50 */
+}
+
+#btnSum {
   color: #3B82F6;
-  font-size: 15px;
+  /* Blue-500 */
 }
 
-/* KB */
-.btn-kb {
-  color: #cbd5e1;
-  font-family: monospace;
-  font-size: 11px;
+#btnSum:hover {
+  background: #eff6ff;
+  /* Blue-50 */
+}
+
+#btnKB {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+#btnSpeed {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+  width: 40px;
+  /* Fixed width prevents jitter */
+}
+
+.active-kb {
+  color: #22c55e !important;
 }

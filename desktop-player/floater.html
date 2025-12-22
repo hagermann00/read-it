@@ -1,7 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Read-It Floater</title>
     <style>
         body {
             margin: 0;
@@ -21,6 +24,20 @@
 
         #grip-top:active {
             cursor: grabbing;
+        }
+
+        .playback-container {
+            width: 200px;
+            padding: 6px;
+            gap: 4px;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            border-radius: 8px;
+        }
+
+        .hidden {
+            display: none !important;
         }
 
         #floater {
@@ -197,7 +214,7 @@
 
         <!-- Collapsed State -->
         <div id="floater" onclick="expand()">
-            <img id="logo" src="assets/logo.png" draggable="false">
+            <img id="logo" src="assets/logo.png" alt="Logo" draggable="false">
         </div>
 
         <!-- Bottom Grip (ORANGE) -->
@@ -210,12 +227,12 @@
         </div>
 
         <!-- Expanded State -->
-        <div id="controls">
+        <div id="controls" class="hidden">
             <div class="header">
                 <div class="title">
-                    <img src="assets/logo.png"> iiwii
+                    <img src="assets/logo.png" alt="Logo"> iiwii
                 </div>
-                <button class="close-btn" onclick="collapse()">×</button>
+                <button class="close-btn" onclick="collapse()" title="Close" aria-label="Close">×</button>
             </div>
 
             <!-- Playback -->
@@ -240,11 +257,22 @@
                 </select>
             </div>
 
-            <!-- Actions -->
             <div class="row">
-                <button id="btnSum" class="btn btn-blue flex-1">✨ Summarize</button>
-                <button id="btnHistory" class="btn flex-1">📜 History</button>
+                <button id="btnSum" class="btn btn-blue flex-1" title="Summarize Text" aria-label="Summarize Text">✨
+                    Summarize</button>
+                <button id="btnHistory" class="btn flex-1" title="View History" aria-label="View History">📜
+                    History</button>
             </div>
+        </div>
+
+        <!-- NEW: Playback Mode (Streamlined) -->
+        <div id="playback-controls" class="playback-container hidden">
+            <button class="btn btn-icon" onclick="window.api.rewind()" title="Back 10s" aria-label="Back 10s">↺
+                10</button>
+            <button id="btnPlayStreamlined" class="btn btn-primary flex-1" title="Stop Playback"
+                aria-label="Stop Playback">🛑 Stop</button>
+            <button class="btn btn-icon" onclick="toggleSpeed()" title="Cycle Speed"
+                aria-label="Cycle Speed">1×</button>
         </div>
     </div>
 
@@ -252,18 +280,38 @@
         const container = document.getElementById('container');
 
         function expand() {
-            container.classList.add('controls-visible');
+            document.getElementById('floater').classList.add('hidden');
+            document.getElementById('controls').classList.remove('hidden');
+            document.getElementById('playback-controls').classList.add('hidden');
             window.api.floaterExpand();
         }
 
         function collapse() {
-            container.classList.remove('controls-visible');
+            document.getElementById('controls').classList.add('hidden');
+            document.getElementById('playback-controls').classList.add('hidden');
+            document.getElementById('floater').classList.remove('hidden');
             window.api.floaterCollapse();
         }
 
+        function showPlayback() {
+            document.getElementById('floater').classList.add('hidden');
+            document.getElementById('controls').classList.add('hidden');
+            document.getElementById('playback-controls').classList.remove('hidden');
+            window.api.floaterExpand(); // Keep it somewhat expanded sized
+        }
+
         // Listen for external commands
-        window.api.onShowControls(() => container.classList.add('controls-visible'));
-        window.api.onHideControls(() => container.classList.remove('controls-visible'));
+        window.api.onShowControls(() => {
+            expand(); // Use full expand logic including hiding others
+        });
+        window.api.onHideControls(() => {
+            collapse();
+        });
+
+        // NEW: Playback mode listener
+        window.api.onShowPlayback(() => {
+            showPlayback();
+        });
 
         // Playback
         let currentText = "";
@@ -299,7 +347,42 @@
             // TODO: Show history
             alert("History coming soon!");
         };
+        // Playback Streamlined Logic
+        document.getElementById('btnPlayStreamlined').onclick = () => {
+            // In streamlined mode, the button is primarily "Stop" because resuming 
+            // requires knowing what was playing.
+            window.api.stop();
+            // After stop, should we go back to icon? 
+            // For now, let's just update UI to show we stopped, or collapse.
+            // Let's collapse back to icon mode after a short delay or immediately?
+            // window.api.floaterCollapse(); // actually main.js handles resizing logic often?
+            // Let's just stop audio. Main process might handle window state.
+        };
+
+        function toggleSpeed() {
+            const speeds = [1, 1.25, 1.5, 2];
+            const current = parseFloat(document.getElementById('speedSelect').value);
+            const idx = speeds.indexOf(current);
+            const next = speeds[(idx + 1) % speeds.length];
+
+            // Update select (which updates global speed variable indirectly if we sync them)
+            document.getElementById('speedSelect').value = next;
+
+            // Update button text
+            const btn = document.querySelector('#playback-controls button:last-child');
+            if (btn) btn.textContent = next + '×';
+
+            // If playing, we might need to restart with new speed? 
+            // The current architecture doesn't support dynamic speed update without restart.
+            // We will just update the preference for now.
+            // Ideally: window.api.speak(currentText, next, voice); 
+            if (currentText) {
+                const voice = document.getElementById('voiceSelect').value || null;
+                window.api.speak(currentText, next, voice);
+            }
+        }
     </script>
 </body>
 
 </html>
+```

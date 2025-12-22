@@ -5,11 +5,17 @@ contextBridge.exposeInMainWorld('api', {
   onNewText: (fn) => ipcRenderer.on('new-text', (e, t) => fn(t)),
   speak: (text, speed, voice) => ipcRenderer.send('speak', { text, speed, voice }),
   stop: () => ipcRenderer.send('stop'),
+  rewind: () => ipcRenderer.send('rewind'), // NEW
   summarize: (text) => ipcRenderer.invoke('summarize', text),
 
   // Floater controls
   floaterExpand: () => ipcRenderer.send('floater-expand'),
   floaterCollapse: () => ipcRenderer.send('floater-collapse'),
-  onShowControls: (fn) => ipcRenderer.on('show-controls', fn),
-  onHideControls: (fn) => ipcRenderer.on('hide-controls', fn)
+  floaterShowPlayback: () => ipcRenderer.send('floater-show-playback'), // Request from UI
+
+  // Listeners
+  onShowControls: (cb) => ipcRenderer.on('show-controls', () => cb()),
+  onHideControls: (cb) => ipcRenderer.on('hide-controls', () => cb()),
+  onShowPlayback: (cb) => ipcRenderer.on('show-playback', () => cb()), // Listen from Main
+  hide: () => ipcRenderer.send('hide-popup')
 });

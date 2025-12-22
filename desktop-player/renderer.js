@@ -24,7 +24,7 @@ function resetHideTimer() {
     if (hideTimer) clearTimeout(hideTimer);
     hideTimer = setTimeout(() => {
         // Hide popup after 8 seconds of inactivity
-        window.close();
+        window.api.hide();
     }, 8000);
 }
 
@@ -36,13 +36,20 @@ window.api.onNewText((text) => {
 // Play verbatim
 btnPlay.onclick = () => {
     if (!canClick()) return;
+
+    // logic: If already speaking, this button acts as Stop
     if (isSpeaking) {
         window.api.stop();
         isSpeaking = false;
         btnPlay.textContent = "▶";
         return;
     }
+
     if (currentText) {
+        // HIDE THE POPUP IMMEDIATELY
+        window.api.hide();
+
+        // Start speaking
         window.api.speak(currentText, speed);
         isSpeaking = true;
         btnPlay.textContent = "🛑";
@@ -74,8 +81,8 @@ btnSum.onclick = async () => {
 // KB placeholder
 btnKB.onclick = () => {
     if (!canClick()) return;
-    btnKB.style.color = "#22c55e";
-    setTimeout(() => btnKB.style.color = "#94a3b8", 500);
+    btnKB.classList.add('active-kb');
+    setTimeout(() => btnKB.classList.remove('active-kb'), 500);
     resetHideTimer();
 };
 
