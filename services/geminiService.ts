@@ -31,7 +31,10 @@ class SafetySystem {
     if (backup2) this.apiKeys.push({ key: backup2, label: 'hagermann00 (backup 2)', consecutiveErrors: 0, lastErrorTime: 0 });
 
     if (this.apiKeys.length === 0) {
-      throw new Error("No API keys configured. Please set GEMINI_API_KEY in .env.local");
+      // In development/test mode without keys, we might want to allow the app to load but fail calls later.
+      // However, the error currently stops the app from rendering.
+      // Let's log a warning instead of throwing.
+      console.warn("No API keys configured. API calls will fail.");
     }
 
     console.log(`🔑 Loaded ${this.apiKeys.length} API key(s) with intelligent fallback`);

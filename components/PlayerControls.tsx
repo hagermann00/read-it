@@ -12,6 +12,8 @@ interface PlayerControlsProps {
   onClearQueue: () => void;
   selectedVoice: string;
   onVoiceChange: (voice: string) => void;
+  onSummarizeAndPlay: () => void;
+  isSummarizing: boolean;
 }
 
 export const PlayerControls: React.FC<PlayerControlsProps> = ({
@@ -24,11 +26,32 @@ export const PlayerControls: React.FC<PlayerControlsProps> = ({
   onVolumeChange,
   onClearQueue,
   selectedVoice,
-  onVoiceChange
+  onVoiceChange,
+  onSummarizeAndPlay,
+  isSummarizing
 }) => {
   return (
-    <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-6 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] z-40 flex flex-col gap-4">
-        
+    <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-6 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] z-40 flex flex-col gap-4 relative">
+
+      {/* Summarize & Play Button - Semi-translucent floating on top */}
+      <div className="absolute -top-14 right-4 z-50">
+        <button
+          onClick={onSummarizeAndPlay}
+          disabled={isSummarizing}
+          className="flex items-center gap-2 bg-white/90 backdrop-blur-sm border border-white/50 shadow-lg px-4 py-2 rounded-full hover:bg-white transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed group"
+          title="Summarize & Read (1.5x)"
+        >
+            <div className={`text-indigo-600 ${isSummarizing ? 'animate-pulse' : ''}`}>
+                {ICONS.BOOK}
+            </div>
+            <div className="w-px h-4 bg-gray-300 mx-1"></div>
+            <div className="text-indigo-600">
+                {ICONS.PLAY}
+            </div>
+            {isSummarizing && <span className="text-xs font-bold text-indigo-500 animate-pulse ml-1">...</span>}
+        </button>
+      </div>
+
       {/* Top Row: Speed, Voice, and Clear */}
       <div className="flex justify-between items-center text-xs text-gray-400 gap-2">
         <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
