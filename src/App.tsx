@@ -36,13 +36,24 @@ function App() {
         const newItem: ReadItem = {
             id: Date.now().toString(),
             url: inputValue,
-            title: inputValue, // We'll fetch title later?
+            title: inputValue,
             status: 'unread',
             addedAt: Date.now()
         };
         setItems([newItem, ...items]);
         setInputValue('');
         setMode('list');
+
+        // Fetch metadata asynchronously
+        window.electron.fetchMetadata(newItem.url).then((title) => {
+            if (title) {
+                setItems((currentItems) =>
+                    currentItems.map(item =>
+                        item.id === newItem.id ? { ...item, title } : item
+                    )
+                );
+            }
+        });
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {

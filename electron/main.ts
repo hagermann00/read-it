@@ -75,3 +75,15 @@ ipcMain.handle('save-to-obsidian', async (event, text) => {
         return false;
     }
 });
+
+ipcMain.handle('fetch-metadata', async (event, url) => {
+    try {
+        const response = await fetch(url);
+        const text = await response.text();
+        const match = text.match(/<title>(.*?)<\/title>/i);
+        return match ? match[1] : null;
+    } catch (e) {
+        console.error('Failed to fetch metadata:', e);
+        return null;
+    }
+});
