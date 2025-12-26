@@ -7,6 +7,7 @@ const electron_1 = require("electron");
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const clipboard_automation_1 = require("./services/clipboard-automation");
+const os_1 = __importDefault(require("os"));
 // Determine paths
 const DIST = path_1.default.join(__dirname, '../dist');
 const PUBLIC = electron_1.app.isPackaged ? DIST : path_1.default.join(__dirname, '../public');
@@ -80,6 +81,10 @@ electron_1.ipcMain.handle('save-to-obsidian', async (event, text) => {
     try {
         fs_1.default.writeFileSync(fullPath, text, 'utf-8');
         return fullPath;
+    const inboxPath = path_1.default.join(os_1.default.homedir(), 'Documents', 'Obsidian-Brain', '00_Inbox', filename);
+    try {
+        fs_1.default.writeFileSync(inboxPath, text, 'utf-8');
+        return true;
     }
     catch (e) {
         console.error('Failed to save to Obsidian:', e);
