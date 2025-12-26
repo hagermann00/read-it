@@ -27,6 +27,7 @@ export default function App() {
   const [currentQueueId, setCurrentQueueId] = useState<string | null>(null);
   const [currentSegmentIndex, setCurrentSegmentIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<'queue' | 'history' | 'saved'>('queue');
+  const [isSummarizing, setIsSummarizing] = useState(false);
 
   // --- Audio Refs ---
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -220,7 +221,7 @@ export default function App() {
 
   const countWords = (str: string) => str.trim().split(/\s+/).length;
 
-  const addToQueue = async (text: string, type: PlaybackType) => {
+  const addToQueue = async (text: string, type: PlaybackType, playImmediately = false) => {
     initAudio();
     const now = Date.now();
     
@@ -266,15 +267,14 @@ export default function App() {
 
     if (replaceId) {
         setQueue(prev => prev.map(item => item.id === replaceId ? newItem : item));
-        if (currentQueueId === replaceId) {
+        if (currentQueueId === replaceId || playImmediately) {
              setCurrentQueueId(replaceId);
              setCurrentSegmentIndex(0);
         }
     } else {
         setQueue(prev => [...prev, newItem]);
-        if (queue.length === 0) {
-            setCurrentQueueId(id);
-            setCurrentSegmentIndex(0);
+        if (queue.length === 0 || playImmediately) {
+            playQueueItem(id);
         }
     }
 
@@ -307,6 +307,33 @@ export default function App() {
         setQueue(prev => prev.map(item => 
             item.id === id ? { ...item, isLoading: false, error: err.message || "Failed" } : item
         ));
+    }
+  };
+
+  const handleSummarizeAndPlay = async () => {
+    if (!currentQueueId && queue.length === 0) return;
+
+    // Determine what to summarize: current item or first item
+    const itemId = currentQueueId || queue[0].id;
+    const item = queue.find(q => q.id === itemId);
+
+    if (!item) return;
+
+    setIsSummarizing(true);
+    stopCurrentAudio();
+
+    try {
+        // Set speed to 1.5x as requested
+        setPlaybackSpeed(1.5);
+
+        // Add to queue as summary and play immediately
+        // We pass the original text so the summarizer works on the full content
+        await addToQueue(item.originalText, PlaybackType.SUMMARY, true);
+
+    } catch (error) {
+        console.error("Summarize and Play failed", error);
+    } finally {
+        setIsSummarizing(false);
     }
   };
 
@@ -471,6 +498,8 @@ export default function App() {
           onClearQueue={clearQueue}
           selectedVoice={selectedVoice}
           onVoiceChange={setSelectedVoice}
+          onSummarizeAndPlay={handleSummarizeAndPlay}
+          isSummarizing={isSummarizing}
       />
     </div>
   );
