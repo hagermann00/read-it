@@ -17,5 +17,8 @@ contextBridge.exposeInMainWorld('api', {
   onShowControls: (cb) => ipcRenderer.on('show-controls', () => cb()),
   onHideControls: (cb) => ipcRenderer.on('hide-controls', () => cb()),
   onShowPlayback: (cb) => ipcRenderer.on('show-playback', () => cb()), // Listen from Main
-  hide: () => ipcRenderer.send('hide-popup')
+  hide: () => ipcRenderer.send('hide-popup'),
+
+  // History
+  getHistory: () => ipcRenderer.invoke('get-history')
 });

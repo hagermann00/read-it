@@ -204,6 +204,59 @@
         .close-btn:hover {
             color: #ef4444;
         }
+
+        /* History View */
+        #history-controls {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            padding: 10px;
+            width: 260px;
+            height: 180px; /* Fit within 280x200 */
+        }
+
+        .controls-visible #history-controls.active {
+            display: flex;
+        }
+
+        .history-list {
+            flex: 1;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: #f8fafc;
+            padding: 4px;
+        }
+
+        .history-item {
+            padding: 8px;
+            border-bottom: 1px solid #e2e8f0;
+            cursor: pointer;
+            font-size: 12px;
+            color: #334155;
+            transition: background 0.1s;
+        }
+
+        .history-item:hover {
+            background: #e2e8f0;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-time {
+            font-size: 10px;
+            color: #64748b;
+            margin-bottom: 2px;
+        }
+
+        .history-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 500;
+        }
     </style>
 </head>
 
@@ -265,6 +318,20 @@
             </div>
         </div>
 
+        <!-- History View -->
+        <div id="history-controls">
+            <div class="header">
+                <div class="title">
+                    <button class="btn btn-icon" style="padding: 2px 8px; height: 24px; margin-right: 6px;" onclick="closeHistory()">◀</button>
+                    History
+                </div>
+                <button class="close-btn" onclick="collapse()" title="Close" aria-label="Close">×</button>
+            </div>
+            <div id="historyList" class="history-list">
+                <!-- Items injected here -->
+            </div>
+        </div>
+
         <!-- NEW: Playback Mode (Streamlined) -->
         <div id="playback-controls" class="playback-container hidden">
             <button class="btn btn-icon" onclick="window.api.rewind()" title="Back 10s" aria-label="Back 10s">↺
@@ -283,12 +350,14 @@
             document.getElementById('floater').classList.add('hidden');
             document.getElementById('controls').classList.remove('hidden');
             document.getElementById('playback-controls').classList.add('hidden');
+            document.getElementById('history-controls').style.display = 'none'; // Ensure history is hidden
             window.api.floaterExpand();
         }
 
         function collapse() {
             document.getElementById('controls').classList.add('hidden');
             document.getElementById('playback-controls').classList.add('hidden');
+            document.getElementById('history-controls').style.display = 'none';
             document.getElementById('floater').classList.remove('hidden');
             window.api.floaterCollapse();
         }
@@ -343,10 +412,40 @@
             }
         };
 
-        document.getElementById('btnHistory').onclick = () => {
-            // TODO: Show history
-            alert("History coming soon!");
+        document.getElementById('btnHistory').onclick = async () => {
+            const history = await window.api.getHistory();
+            const list = document.getElementById('historyList');
+            list.innerHTML = "";
+
+            if (history.length === 0) {
+                list.innerHTML = `<div style="padding: 10px; text-align: center; color: #94a3b8; font-size: 12px;">No history yet</div>`;
+            } else {
+                history.forEach(item => {
+                    const el = document.createElement('div');
+                    el.className = 'history-item';
+                    const date = new Date(item.timestamp).toLocaleString();
+                    el.innerHTML = `
+                        <div class="history-time">${date}</div>
+                        <div class="history-text" title="${item.text.replace(/"/g, '&quot;')}">${item.text}</div>
+                    `;
+                    el.onclick = () => {
+                        currentText = item.text;
+                        closeHistory();
+                        // Optional: auto-play?
+                        // window.api.speak(currentText, ...);
+                    };
+                    list.appendChild(el);
+                });
+            }
+
+            document.getElementById('controls').classList.add('hidden');
+            document.getElementById('history-controls').style.display = 'flex';
         };
+
+        function closeHistory() {
+            document.getElementById('history-controls').style.display = 'none';
+            document.getElementById('controls').classList.remove('hidden');
+        }
         // Playback Streamlined Logic
         document.getElementById('btnPlayStreamlined').onclick = () => {
             // In streamlined mode, the button is primarily "Stop" because resuming 
