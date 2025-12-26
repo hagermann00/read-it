@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const electron_1 = require("electron");
 const path_1 = __importDefault(require("path"));
+const fs_1 = __importDefault(require("fs"));
 const os_1 = __importDefault(require("os"));
 // Determine paths
 const DIST = path_1.default.join(__dirname, '../dist');
@@ -57,4 +58,28 @@ electron_1.ipcMain.on('set-ignore-mouse', (event, ignore) => {
     if (win)
         win.setIgnoreMouseEvents(ignore, { forward: true });
 });
-// Reuse standardized IPC if applicable
+electron_1.ipcMain.handle('save-to-obsidian', async (event, text) => {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = `KB-ReadIt-${timestamp}.md`;
+    const inboxPath = path_1.default.join(os_1.default.homedir(), 'Documents', 'Obsidian-Brain', '00_Inbox', filename);
+    try {
+        fs_1.default.writeFileSync(inboxPath, text, 'utf-8');
+        return true;
+    }
+    catch (e) {
+        console.error('Failed to save to Obsidian:', e);
+        return false;
+    }
+});
+electron_1.ipcMain.handle('fetch-metadata', async (event, url) => {
+    try {
+        const response = await fetch(url);
+        const text = await response.text();
+        const match = text.match(/<title>(.*?)<\/title>/i);
+        return match ? match[1] : null;
+    }
+    catch (e) {
+        console.error('Failed to fetch metadata:', e);
+        return null;
+    }
+});
