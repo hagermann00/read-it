@@ -10,6 +10,7 @@ let GEMINI_API_KEY = "";
 
 const TRIGGER_FILE = "c:\\Y-OS\\Y-IT_ENGINES\\read-it\\desktop-player\\.trigger_event";
 const TOGGLE_FILE = "c:\\Y-OS\\Y-IT_ENGINES\\read-it\\desktop-player\\.toggle_floater";
+const HISTORY_FILE = path.join(app.getPath('userData'), 'history.json');
 
 let isExpanded = false;
 
@@ -106,6 +107,8 @@ ipcMain.on('speak', (e, { text, speed, voice }) => {
     say.stop();
     say.speak(text, voice || null, speed || 1.0);
 
+    addToHistory(text);
+
     // Switch floater to playback mode if it exists
     if (floaterWindow && !floaterWindow.isDestroyed()) {
         floaterWindow.webContents.send('show-playback');
@@ -114,6 +117,49 @@ ipcMain.on('speak', (e, { text, speed, voice }) => {
         isExpanded = true;
         floaterWindow.show();
     }
+});
+
+function addToHistory(text) {
+    if (!text || text.length < 50) return;
+
+    try {
+        let history = [];
+        if (fs.existsSync(HISTORY_FILE)) {
+            history = JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf8'));
+        }
+
+        // Avoid duplicates if the last item is the same
+        if (history.length > 0 && history[0].text === text) {
+            return;
+        }
+
+        const item = {
+            text: text,
+            timestamp: Date.now()
+        };
+
+        history.unshift(item); // Add to beginning
+
+        // Optional: limit history size (e.g., 100 items)
+        if (history.length > 100) {
+            history = history.slice(0, 100);
+        }
+
+        fs.writeFileSync(HISTORY_FILE, JSON.stringify(history, null, 2));
+    } catch (err) {
+        console.error("Error saving history:", err);
+    }
+}
+
+ipcMain.handle('get-history', async () => {
+    try {
+        if (fs.existsSync(HISTORY_FILE)) {
+            return JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf8'));
+        }
+    } catch (err) {
+        console.error("Error reading history:", err);
+    }
+    return [];
 });
 
 // Rewind handler (Mock: Stop and Restart for now as simple 'rewind' is hard with 'say')
